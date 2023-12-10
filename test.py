@@ -21,11 +21,28 @@ import pymysql
 import streamlit as st
 import plotly.express as px
 
+# ======================================== NUMBER CONVERTION ============================================================================ #
+
+# CONVERT TO CRORE
+def convert_to_crore2(number):
+    crore = number / 10000000
+    return round(crore,2)
+
+# CONVERT TO LAKH
+def convert_to_lakh2(number):
+    lakh = number / 100000
+    return round(lakh,2)
+
+# CONVERT TO THOUSAND
+def convert_to_thousand(number):
+    the = number / 1000
+    return round(the,2)
+
 # ==============================================         /   /   DASHBOARD   /   /         ================================================== #
 
 # ==============   /  CONNECT SQL SERVER  /   ACCESS DATA BASE    /   EXECUTE SQL QUERIES      /    ACCESS DATA   /   ========================= #
 
-conn = pymysql.connect(host='localhost', user='root', password='', db='phonepe_pulse')
+conn = pymysql.connect(host='localhost', user='root', password='Msg_0554', db='phonepe_pulse')
 cursor = conn.cursor()
 
 # ============================================       /     STREAMLIT DASHBOARD      /       ================================================= #
@@ -84,148 +101,206 @@ if option == 'All India':
         df_in_tr_co_qry_rslt = pd.DataFrame(np.array(in_tr_co_qry_rslt), columns=['Total','Average'])
         df_in_tr_co_qry_rslt1 = df_in_tr_co_qry_rslt.set_index(['Average'])
 
-        # --------- / Output  /  -------- #
+                           # --------- / Output  /  -------- #
 
-        # ------    /  Geo visualization dashboard for Transaction /   ---- #
-        # Drop a State column from df_in_tr_tab_qry_rslt
-        df_in_tr_tab_qry_rslt.drop(columns=['State'], inplace=True)
-        # Clone the gio data
-        url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
-        response = requests.get(url)
-        data1 = json.loads(response.content)
-        # Extract state names and sort them in alphabetical order
-        state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
-        state_names_tra.sort()
-        # Create a DataFrame with the state names column
-        df_state_names_tra = pd.DataFrame({'State': state_names_tra})
-        # Combine the Gio State name with df_in_tr_tab_qry_rslt
-        df_state_names_tra['Transaction_amount']=df_in_tr_tab_qry_rslt
-        # convert dataframe to csv file
-        df_state_names_tra.to_csv('State_trans.csv', index=False)
-        # Read csv
-        df_tra = pd.read_csv('State_trans.csv')
-        # Geo plot
-        fig_tra = px.choropleth(
-            df_tra,
-            geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
-            featureidkey='properties.ST_NM',locations='State',color='Transaction_amount',color_continuous_scale='thermal',title = 'Transaction Analysis')
-        fig_tra.update_geos(fitbounds="locations", visible=False)
-        fig_tra.update_layout(title_font=dict(size=33),title_font_color='#6739b7', height=800)
-        st.plotly_chart(fig_tra,use_container_width=True)
+        tab1_1, tab1_2,tab1_3 = st.tabs(['Geo visualization','Bar chart','Total calculation'])
+        
+        with tab1_1:
+            # ------    /  Geo visualization dashboard for Transaction /   ---- #
+            # Drop a State column from df_in_tr_tab_qry_rslt
+            df_in_tr_tab_qry_rslt.drop(columns=['State'], inplace=True)
 
-        # ---------   /   All India Transaction Analysis Bar chart  /  ----- #
-        df_in_tr_tab_qry_rslt1['State'] = df_in_tr_tab_qry_rslt1['State'].astype(str)
-        df_in_tr_tab_qry_rslt1['Transaction_amount'] = df_in_tr_tab_qry_rslt1['Transaction_amount'].astype(float)
-        df_in_tr_tab_qry_rslt1_fig = px.bar(df_in_tr_tab_qry_rslt1 , x = 'State', y ='Transaction_amount', color ='Transaction_amount', color_continuous_scale = 'thermal', title = 'Transaction Analysis Chart', height = 700,)
-        df_in_tr_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
-        st.plotly_chart(df_in_tr_tab_qry_rslt1_fig,use_container_width=True)
+            # Clone the gio data
+            url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
+            response = requests.get(url)
+            data1 = json.loads(response.content)
 
-        # -------  /  All India Total Transaction calculation Table   /   ----  #
-        st.header(':violet[Total calculation]')
+            # Extract state names and sort them in alphabetical order
+            state_names_tra = [feature['properties']['ST_NM'] for feature in data1['features']]
+            state_names_tra.sort()
 
-        col4, col5 = st.columns(2)
-        with col4:
-            st.subheader('Transaction Analysis')
-            st.dataframe(df_in_tr_anly_tab_qry_rslt1)
-        with col5:
-            st.subheader('Transaction Amount')
-            st.dataframe(df_in_tr_am_qry_rslt1)
-            st.subheader('Transaction Count')
-            st.dataframe(df_in_tr_co_qry_rslt1)
+            # Create a DataFrame with the state names column
+            df_state_names_tra = pd.DataFrame({'State': state_names_tra})
+
+            # Combine the Gio State name with df_in_tr_tab_qry_rslt
+            df_state_names_tra['Transaction_amount']=df_in_tr_tab_qry_rslt
+
+            # convert dataframe to csv file
+            df_state_names_tra.to_csv('State_trans.csv', index=False)
+
+            # Read csv
+            df_tra = pd.read_csv('State_trans.csv')
+
+            # Geo plot
+            fig_tra = px.choropleth(
+                df_tra,
+                geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                featureidkey='properties.ST_NM',locations='State',color='Transaction_amount',color_continuous_scale='thermal',title = 'Transaction Analysis')
+            fig_tra.update_geos(fitbounds="locations", visible=False)
+            fig_tra.update_layout(title_font=dict(size=33),title_font_color='#6739b7', height=800)
+            st.plotly_chart(fig_tra,use_container_width=True)
+
+        with tab1_2:
+            # ---------   /   All India Transaction Analysis Bar chart  /  ----- #
+            df_in_tr_tab_qry_rslt1['State'] = df_in_tr_tab_qry_rslt1['State'].astype(str)
+            df_in_tr_tab_qry_rslt1['Transaction_amount'] = df_in_tr_tab_qry_rslt1['Transaction_amount'].astype(float).apply(convert_to_crore2)
+            df_in_tr_tab_qry_rslt1_fig = px.bar(df_in_tr_tab_qry_rslt1 , x = 'State', y ='Transaction_amount', color ='Transaction_amount', color_continuous_scale = 'thermal', title = 'Transaction Analysis Chart', height = 700,)
+            df_in_tr_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
+            st.plotly_chart(df_in_tr_tab_qry_rslt1_fig,use_container_width=True)
+        
+        with tab1_3:
+            # -------  /  All India Total Transaction calculation Table   /   ----  #
+            st.header(':violet[Total calculation]')
+
+            col4, col5 = st.columns(2)
+            with col4:
+                st.subheader('Transaction Analysis')
+                st.dataframe(df_in_tr_anly_tab_qry_rslt1)
+            with col5:
+                st.subheader('Transaction Amount')
+                st.dataframe(df_in_tr_am_qry_rslt1)
+                st.subheader('Transaction Count')
+                st.dataframe(df_in_tr_co_qry_rslt1)
 
 
     # ---------------------------------------       /     All India User        /        ------------------------------------ #
     with tab2:
         
-        col1, col2 = st.columns(2)
-        with col1:
+        col_1, col_2 = st.columns(2)
+        with col_1:
             in_us_yr = st.selectbox('**Select Year**', ('2018','2019','2020','2021','2022','2023'),key='in_us_yr')
-        with col2:
+        with col_2:
             in_us_qtr = st.selectbox('**Select Quarter**', ('1','2','3','4'),key='in_us_qtr')
             # if in_us_yr == '2022' and in_us_qtr ==  '2' or '3' or '4' or in_us_yr == '2023' and in_us_qtr ==  '1' or '2' or '3' or '4':
             #     with col5:
                     #st.header("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year data, so can't feed data to sql ")
         # SQL Query
+        tab2_1, tab2_2,tab2_3 = st.tabs(['Geo visualization','Bar chart','Total calculation'])
 
-        # User Analysis Bar chart query
-    try:
-        cursor.execute(f"SELECT State, SUM(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}' GROUP BY State;")
-        in_us_tab_qry_rslt = cursor.fetchall()
-        df_in_us_tab_qry_rslt = pd.DataFrame(np.array(in_us_tab_qry_rslt), columns=['State', 'User Count'])
-        df_in_us_tab_qry_rslt1 = df_in_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_in_us_tab_qry_rslt)+1)))
-        
+        with tab2_1:
+                            # User Analysis Bar chart query
+            try: 
+                cursor.execute(f"SELECT State, SUM(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}' GROUP BY State;")
+                in_us_tab_qry_rslt = cursor.fetchall()
+                df_in_us_tab_qry_rslt = pd.DataFrame(np.array(in_us_tab_qry_rslt), columns=['State', 'User Count'])
+                df_in_us_tab_qry_rslt1 = df_in_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_in_us_tab_qry_rslt)+1)))
+                    
 
-        # Total User Count table query
-        
-        cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}';")
-        in_us_co_qry_rslt = cursor.fetchall()
-        df_in_us_co_qry_rslt = pd.DataFrame(np.array(in_us_co_qry_rslt), columns=['Total','Average'])
-        df_in_us_co_qry_rslt1 = df_in_us_co_qry_rslt.set_index(['Average'])
-       
+                # Total User Count table query
+                    
+                cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}';")
+                in_us_co_qry_rslt = cursor.fetchall()
+                df_in_us_co_qry_rslt = pd.DataFrame(np.array(in_us_co_qry_rslt), columns=['Total','Average'])
+                df_in_us_co_qry_rslt1 = df_in_us_co_qry_rslt.set_index(['Average'])
+            
 
-        # ---------  /  Output  /  -------- #
-        
+                # ---------  /  Output  /  -------- #
+            
 
-            # ------    /  Geo visualization dashboard for User  /   ---- #
-        
-           # Drop a State column from df_in_us_tab_qry_rslt
-        
-        df_in_us_tab_qry_rslt.drop(columns=['State'], inplace=True)
-                # Clone the gio data
-        url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
-        response = requests.get(url)
-        data2 = json.loads(response.content)
-                # Extract state names and sort them in alphabetical order
-        state_names_use = [feature['properties']['ST_NM'] for feature in data2['features']]
-        state_names_use.sort()
-            # Create a DataFrame with the state names column
-        df_state_names_use = pd.DataFrame({'State': state_names_use})
-                # Combine the Gio State name with df_in_tr_tab_qry_rslt
-        df_state_names_use['User Count']=df_in_us_tab_qry_rslt
-                # convert dataframe to csv file
-        df_state_names_use.to_csv('State_user.csv', index=False)
-            # Read csv
-        df_use = pd.read_csv('State_user.csv')
-                # Geo plot
-        fig_use = px.choropleth(
-                    df_use,
-                    geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
-                    featureidkey='properties.ST_NM',locations='State',color='User Count',color_continuous_scale='thermal',title = 'User Analysis')
-        fig_use.update_geos(fitbounds="locations", visible=False)
-        fig_use.update_layout(title_font=dict(size=33),title_font_color='#6739b7', height=800)
-        st.plotly_chart(fig_use,use_container_width=True)
-        
+                    # ------    /  Geo visualization dashboard for User  /   ---- #   
+                # Drop a State column from df_in_us_tab_qry_rslt
+                
+                df_in_us_tab_qry_rslt.drop(columns=['State'], inplace=True)
+                        # Clone the gio data
+                url = "https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson"
+                response = requests.get(url)
+                data2 = json.loads(response.content)
 
+                    # Extract state names and sort them in alphabetical order
+                state_names_use = [feature['properties']['ST_NM'] for feature in data2['features']]
+                state_names_use.sort()
 
-        
-         # ----   /   All India User Analysis Bar chart   /     -------- #
-        
-        df_in_us_tab_qry_rslt1['State'] = df_in_us_tab_qry_rslt1['State'].astype(str)
-        df_in_us_tab_qry_rslt1['User Count'] = df_in_us_tab_qry_rslt1['User Count'].astype(int)
-        df_in_us_tab_qry_rslt1_fig = px.bar(df_in_us_tab_qry_rslt1 , x = 'State', y ='User Count', color ='User Count', color_continuous_scale = 'thermal', title = 'User Analysis Chart', height = 700,)
-        df_in_us_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
-        st.plotly_chart(df_in_us_tab_qry_rslt1_fig,use_container_width=True)
-         
+                    # Create a DataFrame with the state names column
+                df_state_names_use = pd.DataFrame({'State': state_names_use})
 
-            # -----   /   All India Total User calculation Table   /   ----- #
-        st.header(':violet[Total calculation]')
+                    # Combine the Gio State name with df_in_tr_tab_qry_rslt
+                df_state_names_use['User Count']=df_in_us_tab_qry_rslt
 
-        col3, col4 = st.columns(2)
-        
-        with col3:
-            st.subheader('User Analysis')
-            st.dataframe(df_in_us_tab_qry_rslt1)
-       
-              
-        with col4:
-            st.subheader('User Count')
-            st.dataframe(df_in_us_co_qry_rslt1)
-    except:
-        st.header("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year Phonepe Pluse data, so can't feed data to sql and can't visualize ")          
+                    # convert dataframe to csv file
+                df_state_names_use.to_csv('State_user.csv', index=False)
+
+                    # Read csv
+                df_use = pd.read_csv('State_user.csv')
+
+                    # Geo plot
+                fig_use = px.choropleth(
+                            df_use,
+                            geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                            featureidkey='properties.ST_NM',locations='State',color='User Count',color_continuous_scale='thermal',title = 'User Analysis')
+                fig_use.update_geos(fitbounds="locations", visible=False)
+                fig_use.update_layout(title_font=dict(size=33),title_font_color='#6739b7', height=800)
+                st.plotly_chart(fig_use,use_container_width=True)
+
+            except:
+                st.error("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year Phonepe Pluse data, so can't feed data to sql and can't visualize ")          
 
 
 
-# ==============================================          /     State wise       /             ============================================== #
+
+        with tab2_2:
+            try:
+                cursor.execute(f"SELECT State, SUM(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}' GROUP BY State;")
+                in_us_tab_qry_rslt = cursor.fetchall()
+                df_in_us_tab_qry_rslt = pd.DataFrame(np.array(in_us_tab_qry_rslt), columns=['State', 'User Count'])
+                df_in_us_tab_qry_rslt1 = df_in_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_in_us_tab_qry_rslt)+1)))
+                    
+
+                # Total User Count table query
+                    
+                cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}';")
+                in_us_co_qry_rslt = cursor.fetchall()
+                df_in_us_co_qry_rslt = pd.DataFrame(np.array(in_us_co_qry_rslt), columns=['Total','Average'])
+                df_in_us_co_qry_rslt1 = df_in_us_co_qry_rslt.set_index(['Average'])
+            
+
+                # # ---------  /  Output  /  -------- #
+
+            # ----   /   All India User Analysis Bar chart   /     -------- #
+            
+                df_in_us_tab_qry_rslt1['State'] = df_in_us_tab_qry_rslt1['State'].astype(str)
+                df_in_us_tab_qry_rslt1['User Count'] = df_in_us_tab_qry_rslt1['User Count'].astype(int).apply(convert_to_lakh2)
+                df_in_us_tab_qry_rslt1_fig = px.bar(df_in_us_tab_qry_rslt1 , x = 'State', y ='User Count', color ='User Count', color_continuous_scale = 'thermal', title = 'User Analysis Chart', height = 700,)
+                df_in_us_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
+                st.plotly_chart(df_in_us_tab_qry_rslt1_fig,use_container_width=True)
+            
+            except:
+                st.error("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year Phonepe Pluse data, so can't feed data to sql and can't visualize ")          
+
+            with tab2_3:
+                try:
+                    cursor.execute(f"SELECT State, SUM(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}' GROUP BY State;")
+                    in_us_tab_qry_rslt = cursor.fetchall()
+                    df_in_us_tab_qry_rslt = pd.DataFrame(np.array(in_us_tab_qry_rslt), columns=['State', 'User Count'])
+                    df_in_us_tab_qry_rslt1 = df_in_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_in_us_tab_qry_rslt)+1)))
+                        
+
+                    # Total User Count table query
+                        
+                    cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}';")
+                    in_us_co_qry_rslt = cursor.fetchall()
+                    df_in_us_co_qry_rslt = pd.DataFrame(np.array(in_us_co_qry_rslt), columns=['Total','Average'])
+                    df_in_us_co_qry_rslt1 = df_in_us_co_qry_rslt.set_index(['Average'])
+
+
+                # -----   /   All India Total User calculation Table   /   ----- #
+                    st.header(':violet[Total calculation]')
+
+                    col3, col4 = st.columns(2)
+                    
+                    with col3:
+                        st.subheader('User Analysis State Wise')
+                        st.dataframe(df_in_us_tab_qry_rslt1)
+                
+                        
+                    with col4:
+                        st.subheader('Aggregated User Count')
+                        st.dataframe(df_in_us_co_qry_rslt1)
+                except:
+                    st.error("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year Phonepe Pluse data, so can't feed data to sql and can't visualize ")          
+
+
+
+# # ==============================================          /     State wise       /             ============================================== #
 elif option =='State wise':
 
     # Select tab
@@ -274,26 +349,29 @@ elif option =='State wise':
         df_st_tr_co_qry_rslt1 = df_st_tr_co_qry_rslt.set_index(['Average'])
 
         # ---------  /  Output  /  -------- #
+        tab_123,tab_456=st.tabs(['Bar Chart','Total calculation'])
 
-        # -----    /   State wise Transaction Analysis bar chart   /   ------ #
-        df_st_tr_tab_bar_qry_rslt1['Transaction_type'] = df_st_tr_tab_bar_qry_rslt1['Transaction_type'].astype(str)
-        df_st_tr_tab_bar_qry_rslt1['Transaction_amount'] = df_st_tr_tab_bar_qry_rslt1['Transaction_amount'].astype(float)
-        df_st_tr_tab_bar_qry_rslt1_fig = px.bar(df_st_tr_tab_bar_qry_rslt1 , x = 'Transaction_type', y ='Transaction_amount', color ='Transaction_amount', color_continuous_scale = 'thermal', title = 'Transaction Analysis Chart', height = 500,)
-        df_st_tr_tab_bar_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
-        st.plotly_chart(df_st_tr_tab_bar_qry_rslt1_fig,use_container_width=True)
+        with tab_123:
+            # -----    /   State wise Transaction Analysis bar chart   /   ------ #
+            df_st_tr_tab_bar_qry_rslt1['Transaction_type'] = df_st_tr_tab_bar_qry_rslt1['Transaction_type'].astype(str)
+            df_st_tr_tab_bar_qry_rslt1['Transaction_amount'] = df_st_tr_tab_bar_qry_rslt1['Transaction_amount'].astype(float).apply(convert_to_crore2)
+            df_st_tr_tab_bar_qry_rslt1_fig = px.bar(df_st_tr_tab_bar_qry_rslt1 , x = 'Transaction_type', y ='Transaction_amount', color ='Transaction_amount', color_continuous_scale = 'thermal', title = 'Transaction Analysis Chart', height = 500,)
+            df_st_tr_tab_bar_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
+            st.plotly_chart(df_st_tr_tab_bar_qry_rslt1_fig,use_container_width=True)
 
-        # ------  /  State wise Total Transaction calculation Table  /  ---- #
-        st.header(':violet[Total calculation]')
+        with tab_456:
+            # ------  /  State wise Total Transaction calculation Table  /  ---- #
+            st.header(':violet[Total calculation]')
 
-        col4, col5 = st.columns(2)
-        with col4:
-            st.subheader('Transaction Analysis')
-            st.dataframe(df_st_tr_anly_tab_qry_rslt1)
-        with col5:
-            st.subheader('Transaction Amount')
-            st.dataframe(df_st_tr_am_qry_rslt1)
-            st.subheader('Transaction Count')
-            st.dataframe(df_st_tr_co_qry_rslt1)
+            col4, col5 = st.columns(2)
+            with col4:
+                st.subheader('Transaction Analysis')
+                st.dataframe(df_st_tr_anly_tab_qry_rslt1)
+            with col5:
+                st.subheader('Transaction Amount')
+                st.dataframe(df_st_tr_am_qry_rslt1)
+                st.subheader('Transaction Count')
+                st.dataframe(df_st_tr_co_qry_rslt1)
    
     # -----------------------------------------       /     State wise User        /        ---------------------------------- # 
     with tab4:
@@ -308,42 +386,61 @@ elif option =='State wise':
         with col6:
             st_us_yr = st.selectbox('**Select Year**', ('2018','2019','2020','2021','2022','2023'),key='st_us_yr')
        
-        # SQL Query
+                          # SQL Query
+        tab_789,tab_007=st.tabs(['Bar Chart','Total calculation'])
 
+        with tab_789:
         # User Analysis Bar chart query
-    try:    
-        cursor.execute(f"SELECT Quarter, SUM(Count) FROM aggregated_user WHERE State = '{st_us_st}' AND Year = '{st_us_yr}' GROUP BY Quarter;")
-        st_us_tab_qry_rslt = cursor.fetchall()
-        df_st_us_tab_qry_rslt = pd.DataFrame(np.array(st_us_tab_qry_rslt), columns=['Quarter', 'User Count'])
-        df_st_us_tab_qry_rslt1 = df_st_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_st_us_tab_qry_rslt)+1)))
+            try:    
+                cursor.execute(f"SELECT Quarter, SUM(Count) FROM aggregated_user WHERE State = '{st_us_st}' AND Year = '{st_us_yr}' GROUP BY Quarter;")
+                st_us_tab_qry_rslt = cursor.fetchall()
+                df_st_us_tab_qry_rslt = pd.DataFrame(np.array(st_us_tab_qry_rslt), columns=['Quarter', 'User Count'])
+                df_st_us_tab_qry_rslt1 = df_st_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_st_us_tab_qry_rslt)+1)))
 
-        # Total User Count table query
-        cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user WHERE State = '{st_us_st}' AND Year = '{st_us_yr}';")
-        st_us_co_qry_rslt = cursor.fetchall()
-        df_st_us_co_qry_rslt = pd.DataFrame(np.array(st_us_co_qry_rslt), columns=['Total','Average'])
-        df_st_us_co_qry_rslt1 = df_st_us_co_qry_rslt.set_index(['Average'])
+                # Total User Count table query
+                cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user WHERE State = '{st_us_st}' AND Year = '{st_us_yr}';")
+                st_us_co_qry_rslt = cursor.fetchall()
+                df_st_us_co_qry_rslt = pd.DataFrame(np.array(st_us_co_qry_rslt), columns=['Total','Average'])
+                df_st_us_co_qry_rslt1 = df_st_us_co_qry_rslt.set_index(['Average'])
 
-        # ---------  /  Output  /  -------- #
+                # ---------  /  Output  /  -------- #
 
-        # -----   /   All India User Analysis Bar chart   /   ----- #
-        df_st_us_tab_qry_rslt1['Quarter'] = df_st_us_tab_qry_rslt1['Quarter'].astype(int)
-        df_st_us_tab_qry_rslt1['User Count'] = df_st_us_tab_qry_rslt1['User Count'].astype(int)
-        df_st_us_tab_qry_rslt1_fig = px.bar(df_st_us_tab_qry_rslt1 , x = 'Quarter', y ='User Count', color ='User Count', color_continuous_scale = 'thermal', title = 'User Analysis Chart', height = 500,)
-        df_st_us_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
-        st.plotly_chart(df_st_us_tab_qry_rslt1_fig,use_container_width=True)
+                # -----   /   All India User Analysis Bar chart   /   ----- #
+                df_st_us_tab_qry_rslt1['Quarter'] = df_st_us_tab_qry_rslt1['Quarter'].astype(int)
+                df_st_us_tab_qry_rslt1['User Count'] = df_st_us_tab_qry_rslt1['User Count'].astype(int)
+                df_st_us_tab_qry_rslt1_fig = px.bar(df_st_us_tab_qry_rslt1 , x = 'Quarter', y ='User Count', color ='User Count', color_continuous_scale = 'thermal', title = 'User Analysis Chart', height = 500,)
+                df_st_us_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
+                st.plotly_chart(df_st_us_tab_qry_rslt1_fig,use_container_width=True)
+            
+            except:
+                st.error("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year Phonepe Pluse data, so can't feed data to sql and can't visualize ")                      
 
-        # ------    /   State wise User Total User calculation Table   /   -----#
-        st.header(':violet[Total calculation]')
+        with tab_007:
+            try:
+                cursor.execute(f"SELECT Quarter, SUM(Count) FROM aggregated_user WHERE State = '{st_us_st}' AND Year = '{st_us_yr}' GROUP BY Quarter;")
+                st_us_tab_qry_rslt = cursor.fetchall()
+                df_st_us_tab_qry_rslt = pd.DataFrame(np.array(st_us_tab_qry_rslt), columns=['Quarter', 'User Count'])
+                df_st_us_tab_qry_rslt1 = df_st_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_st_us_tab_qry_rslt)+1)))
 
-        col3, col4 = st.columns(2)
-        with col3:
-            st.subheader('User Analysis')
-            st.dataframe(df_st_us_tab_qry_rslt1)
-        with col4:
-            st.subheader('User Count')
-            st.dataframe(df_st_us_co_qry_rslt1)
-    except:
-        st.header("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year Phonepe Pluse data, so can't feed data to sql and can't visualize ")                      
+                # Total User Count table query
+                cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user WHERE State = '{st_us_st}' AND Year = '{st_us_yr}';")
+                st_us_co_qry_rslt = cursor.fetchall()
+                df_st_us_co_qry_rslt = pd.DataFrame(np.array(st_us_co_qry_rslt), columns=['Total','Average'])
+                df_st_us_co_qry_rslt1 = df_st_us_co_qry_rslt.set_index(['Average'])
+
+            # ------    /   State wise User Total User calculation Table   /   -----#
+                st.header(':violet[Total calculation]')
+
+                col3, col4 = st.columns(2)
+                with col3:
+                    st.subheader('User Analysis')
+                    st.dataframe(df_st_us_tab_qry_rslt1)
+                with col4:
+                    st.subheader('User Count')
+                    st.dataframe(df_st_us_co_qry_rslt1)
+
+            except:
+                st.error("where the aggregated_user data from 2022 (Qtr 2,3,4) to 2023 (Qtr 1,2,3) are not same like previous year Phonepe Pluse data, so can't feed data to sql and can't visualize ")                      
 
 
 
@@ -372,18 +469,21 @@ else:
         df_top_tr_anly_tab_qry_rslt1 = df_top_tr_anly_tab_qry_rslt.set_index(pd.Index(range(1, len(df_top_tr_anly_tab_qry_rslt)+1)))
 
         # ---------  /  Output  /  -------- #
+        tab_135,tab_686 = st.tabs(['Bar chart','Top 10'])
 
-        # -----   /   All India Transaction Analysis Bar chart   /   ----- #
-        df_top_tr_tab_qry_rslt1['State'] = df_top_tr_tab_qry_rslt1['State'].astype(str)
-        df_top_tr_tab_qry_rslt1['Top Transaction amount'] = df_top_tr_tab_qry_rslt1['Top Transaction amount'].astype(float)
-        df_top_tr_tab_qry_rslt1_fig = px.bar(df_top_tr_tab_qry_rslt1 , x = 'State', y ='Top Transaction amount', color ='Top Transaction amount', color_continuous_scale = 'thermal', title = 'Top Transaction Analysis Chart', height = 600,)
-        df_top_tr_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
-        st.plotly_chart(df_top_tr_tab_qry_rslt1_fig,use_container_width=True)
+        with tab_135:
+            # -----   /   All India Transaction Analysis Bar chart   /   ----- #
+            df_top_tr_tab_qry_rslt1['State'] = df_top_tr_tab_qry_rslt1['State'].astype(str)
+            df_top_tr_tab_qry_rslt1['Top Transaction amount'] = df_top_tr_tab_qry_rslt1['Top Transaction amount'].astype(float).apply(convert_to_crore2)
+            df_top_tr_tab_qry_rslt1_fig = px.bar(df_top_tr_tab_qry_rslt1 , x = 'State', y ='Top Transaction amount', color ='Top Transaction amount', color_continuous_scale = 'thermal', title = 'Top Transaction Analysis Chart', height = 600,)
+            df_top_tr_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
+            st.plotly_chart(df_top_tr_tab_qry_rslt1_fig,use_container_width=True)
 
-        # -----   /   All India Total Transaction calculation Table   /   ----- #
-        st.header(':violet[Total calculation]')
-        st.subheader('Top Transaction Analysis')
-        st.dataframe(df_top_tr_anly_tab_qry_rslt1)
+        with tab_686: 
+            # -----   /   All India Total Transaction calculation Table   /   ----- #
+            #st.header(':violet[Total calculation]')
+            st.subheader('Top Transaction Analysis')
+            st.dataframe(df_top_tr_anly_tab_qry_rslt1)
 
 
     # -------------------------       /     All India Top User        /        ------------------ #
@@ -399,18 +499,21 @@ else:
         df_top_us_tab_qry_rslt1 = df_top_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_top_us_tab_qry_rslt)+1)))
 
         # ---------  /  Output  /  -------- #
+        tab_101,tab_102 = st.tabs(['Bar chart','Top 10'])
 
-        # -----   /   All India User Analysis Bar chart   /   ----- #
-        df_top_us_tab_qry_rslt1['State'] = df_top_us_tab_qry_rslt1['State'].astype(str)
-        df_top_us_tab_qry_rslt1['Total User count'] = df_top_us_tab_qry_rslt1['Total User count'].astype(float)
-        df_top_us_tab_qry_rslt1_fig = px.bar(df_top_us_tab_qry_rslt1 , x = 'State', y ='Total User count', color ='Total User count', color_continuous_scale = 'thermal', title = 'Top User Analysis Chart', height = 600,)
-        df_top_us_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
-        st.plotly_chart(df_top_us_tab_qry_rslt1_fig,use_container_width=True)
-
-        # -----   /   All India Total Transaction calculation Table   /   ----- #
-        st.header(':violet[Total calculation]')
-        st.subheader('Total User Analysis')
-        st.dataframe(df_top_us_tab_qry_rslt1)
+        with tab_101:
+            # -----   /   All India User Analysis Bar chart   /   ----- #
+            df_top_us_tab_qry_rslt1['State'] = df_top_us_tab_qry_rslt1['State'].astype(str)
+            df_top_us_tab_qry_rslt1['Total User count'] = df_top_us_tab_qry_rslt1['Total User count'].astype(float).apply(convert_to_lakh2)
+            df_top_us_tab_qry_rslt1_fig = px.bar(df_top_us_tab_qry_rslt1 , x = 'State', y ='Total User count', color ='Total User count', color_continuous_scale = 'thermal', title = 'Top User Analysis Chart', height = 600,)
+            df_top_us_tab_qry_rslt1_fig.update_layout(title_font=dict(size=33),title_font_color='#6739b7')
+            st.plotly_chart(df_top_us_tab_qry_rslt1_fig,use_container_width=True)
+        
+        with tab_102:
+            # -----   /   All India Total Transaction calculation Table   /   ----- #
+            st.header(':violet[Total calculation]')
+            st.subheader('Total User Analysis')
+            st.dataframe(df_top_us_tab_qry_rslt1)
 
 
 
