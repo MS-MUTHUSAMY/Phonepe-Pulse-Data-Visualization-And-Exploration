@@ -184,16 +184,7 @@ if option == 'All India':
                 in_us_tab_qry_rslt = cursor.fetchall()
                 df_in_us_tab_qry_rslt = pd.DataFrame(np.array(in_us_tab_qry_rslt), columns=['State', 'User Count'])
                 df_in_us_tab_qry_rslt1 = df_in_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_in_us_tab_qry_rslt)+1)))
-                    
-
-                # Total User Count table query
-                    
-                cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}';")
-                in_us_co_qry_rslt = cursor.fetchall()
-                df_in_us_co_qry_rslt = pd.DataFrame(np.array(in_us_co_qry_rslt), columns=['Total','Average'])
-                df_in_us_co_qry_rslt1 = df_in_us_co_qry_rslt.set_index(['Average'])
-            
-
+                        
                 # ---------  /  Output  /  -------- #
             
 
@@ -244,15 +235,7 @@ if option == 'All India':
                 df_in_us_tab_qry_rslt = pd.DataFrame(np.array(in_us_tab_qry_rslt), columns=['State', 'User Count'])
                 df_in_us_tab_qry_rslt1 = df_in_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_in_us_tab_qry_rslt)+1)))
                     
-
-                # Total User Count table query
-                    
-                cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}';")
-                in_us_co_qry_rslt = cursor.fetchall()
-                df_in_us_co_qry_rslt = pd.DataFrame(np.array(in_us_co_qry_rslt), columns=['Total','Average'])
-                df_in_us_co_qry_rslt1 = df_in_us_co_qry_rslt.set_index(['Average'])
             
-
                 # # ---------  /  Output  /  -------- #
 
             # ----   /   All India User Analysis Bar chart   /     -------- #
@@ -268,12 +251,6 @@ if option == 'All India':
 
             with tab2_3:
                 try:
-                    cursor.execute(f"SELECT State, SUM(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}' GROUP BY State;")
-                    in_us_tab_qry_rslt = cursor.fetchall()
-                    df_in_us_tab_qry_rslt = pd.DataFrame(np.array(in_us_tab_qry_rslt), columns=['State', 'User Count'])
-                    df_in_us_tab_qry_rslt1 = df_in_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_in_us_tab_qry_rslt)+1)))
-                        
-
                     # Total User Count table query
                         
                     cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user  WHERE Year = '{in_us_yr}' AND Quarter = '{in_us_qtr}';")
@@ -397,12 +374,6 @@ elif option =='State wise':
                 df_st_us_tab_qry_rslt = pd.DataFrame(np.array(st_us_tab_qry_rslt), columns=['Quarter', 'User Count'])
                 df_st_us_tab_qry_rslt1 = df_st_us_tab_qry_rslt.set_index(pd.Index(range(1, len(df_st_us_tab_qry_rslt)+1)))
 
-                # Total User Count table query
-                cursor.execute(f"SELECT SUM(Count), AVG(Count) FROM aggregated_user WHERE State = '{st_us_st}' AND Year = '{st_us_yr}';")
-                st_us_co_qry_rslt = cursor.fetchall()
-                df_st_us_co_qry_rslt = pd.DataFrame(np.array(st_us_co_qry_rslt), columns=['Total','Average'])
-                df_st_us_co_qry_rslt1 = df_st_us_co_qry_rslt.set_index(['Average'])
-
                 # ---------  /  Output  /  -------- #
 
                 # -----   /   All India User Analysis Bar chart   /   ----- #
@@ -517,4 +488,4 @@ else:
 
 
 
-# ==================
+# ======================================================FINISH===========================================================================================#
