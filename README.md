@@ -1,6 +1,6 @@
 Phonepe Pulse Data Visualization
 
-INTRODUCTION
+# INTRODUCTION
 
     PhonePe has become one of the most popular digital payment platforms in India, with millions of users relying on it for their day-to-day transactions. The app is known for its simplicity, user-friendly interface, and fast and secure payment processing. It has also won several awards and accolades for its innovative features and contributions to the digital payments industry.
 
@@ -8,9 +8,8 @@ INTRODUCTION
 
     " Disclaimer:-This data between 2018 to 2023 (Till Qtr 3) in INDIA only "
 
-INTRO GUI
 
-DEVELOPER GUIDE
+# DEVELOPER GUIDE
 
  1. Tools install
     virtual code.
@@ -62,7 +61,7 @@ DEVELOPER GUIDE
    c) Visualization
    Finally, create a Dashboard by using Streamlit and applying selection and dropdown options on the Dashboard and show the output are Geo visualization, bar chart, and Dataframe Table
 
-USER GUIDE
+#USER GUIDE
 
 Step 1.
   Select any one option fron All India or State wise or Top Ten categories.
