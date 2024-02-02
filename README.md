@@ -22,26 +22,26 @@ Phonepe Pulse Data Visualization
     pip install pandas numpy os json requests subprocess mysql.connector sqlalchemy pymysql streamlit plotly.express
 
  3. Import Libraries
-    clone libraries
+   * clone libraries
 
-    import requests
-    import subprocess
-    pandas, numpy and file handling libraries
+   * import requests
+   * import subprocess
+   * pandas, numpy and file handling libraries
 
-    import pandas as pd
-    import numpy as np
-    import os
-    import json
-    SQL libraries
+   * import pandas as pd
+   * import numpy as np
+   * import os
+   * import json
+   * SQL libraries
 
-    import mysql.connector
-    import sqlalchemy
-    from sqlalchemy import create_engine
-    import pymysql
-    Dashboard libraries
+   * import mysql.connector
+   * import sqlalchemy
+   * from sqlalchemy import create_engine
+   * import pymysql
+   * Dashboard libraries
 
-   import streamlit as st
-   import plotly.express as px
+   * import streamlit as st
+   * import plotly.express as px
 
  4. E T L Process
 
