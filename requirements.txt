@@ -1,0 +1,11 @@
+requests
+subprocess
+pandas 
+numpy
+os
+json
+mysql.connector
+sqlalchemy
+pymysql
+streamlit
+plotly.express 
