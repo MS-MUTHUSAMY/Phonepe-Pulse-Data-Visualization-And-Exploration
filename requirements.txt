@@ -1,7 +1,6 @@
 requests
 pandas 
 numpy
-os
 json
 mysql.connector
 sqlalchemy
